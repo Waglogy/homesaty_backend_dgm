@@ -1,0 +1,7 @@
+.env
+node_modules
+
+# API Documentation and Postman Collection
+API_DOC.md
+Homestay_Backend_API.postman_collection.json
+*.postman_collection.json
