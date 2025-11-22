@@ -26,6 +26,7 @@ app.use(helmet({
 const allowedOrigins = [
     process.env.CLIENT_URL,
     "https://daragharmaila.com",
+    "https://www.daragharmaila.com",
     "http://localhost:3000",
     "http://localhost:3001",
 ].filter(Boolean); // Remove undefined values
@@ -47,13 +48,14 @@ app.use(cors({
     exposedHeaders: ["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
 }));
 
-// Rate limiting
+// Rate limiting (skip OPTIONS requests for CORS preflight)
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests per windowMs
     message: "Too many requests from this IP, please try again later.",
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === "OPTIONS", // Skip rate limiting for preflight requests
 });
 
 app.use(limiter);
