@@ -16,6 +16,10 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy - Required for Vercel and other proxy servers
+// This tells Express to trust the X-Forwarded-* headers from the proxy
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -49,6 +53,7 @@ app.use(cors({
 }));
 
 // Rate limiting (skip OPTIONS requests for CORS preflight)
+// Custom keyGenerator to properly handle proxy headers (Vercel)
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests per windowMs
@@ -56,6 +61,13 @@ const limiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => req.method === "OPTIONS", // Skip rate limiting for preflight requests
+    keyGenerator: (req) => {
+        // When trust proxy is enabled, Express automatically uses X-Forwarded-For to set req.ip
+        return req.ip || req.socket.remoteAddress || 'unknown';
+    },
+    validate: {
+        trustProxy: true, // Trust proxy headers
+    },
 });
 
 app.use(limiter);

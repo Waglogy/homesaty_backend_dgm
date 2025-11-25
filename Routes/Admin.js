@@ -20,6 +20,13 @@ const authLimiter = rateLimit({
     message: "Too many authentication attempts, please try again later.",
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => {
+        // When trust proxy is enabled, Express automatically uses X-Forwarded-For to set req.ip
+        return req.ip || req.socket.remoteAddress || 'unknown';
+    },
+    validate: {
+        trustProxy: true, // Trust proxy headers
+    },
 });
 
 // Public routes with strict rate limiting
